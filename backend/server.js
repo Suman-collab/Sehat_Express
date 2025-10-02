@@ -10,12 +10,27 @@ import adminRouter from "./routes/adminRoute.js"
 // app config
 const app = express()
 const port = process.env.PORT || 4000
-connectDB()
 connectCloudinary()
+
+let isConnected=false;
+
+async function connectToDb(){
+  try{
+    connectDB()
+  }catch(error){
+    console.log("Error In DB")
+  }
+}
 
 // middlewares
 app.use(express.json())
 app.use(cors())
+
+app.use((req,res,next)=>{
+  if(!isConnected){
+    connectToDb();
+  }
+})
 
 // api endpoints
 app.use("/api/user", userRouter)
@@ -26,4 +41,6 @@ app.get("/", (req, res) => {
   res.send("API Working")
 });
 
-app.listen(port, () => console.log(`Server started on PORT:${port}`))
+// app.listen(port, () => console.log(`Server started on PORT:${port}`))
+
+module.exports = app
